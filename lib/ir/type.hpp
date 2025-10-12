@@ -6,12 +6,12 @@
 namespace injir {
 
 enum class Type : type_t {
-  kInt,
-  // kInt32,
-  // kInt64,
-  kFloat,
+    kInt,
+    // kInt32,
+    // kInt64,
+    kFloat,
 
-  kUnknown,
+    kUnknown,
 };
 }
 #endif // TYPE_HPP
