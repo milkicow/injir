@@ -36,52 +36,43 @@ class Builder final {
         return m_current_func;
     }
 
-    BasicBlock *create_bb(std::string bb_name) {
+    BasicBlock *create_bb() {
         assert(m_current_func && "current function is nullptr");
 
-        auto bb_it = m_current_func->emplace_back(std::move(bb_name));
+        auto bb_it = m_current_func->emplace_back(BasicBlock{});
         return &(*bb_it);
     }
 
-    BinInstr *create_bin_instr(BinInstr::Opcode opcode, const Value *lhs, const Value *rhs) {
+    BinInstr *create_bin_instr(InstrType type, const Value *lhs, const Value *rhs) {
         assert(m_current_bb && "current basic block is nullptr");
         assert(lhs && "lhs value is nullptr");
         assert(rhs && "rhs value is nullptr");
 
         return static_cast<BinInstr *>(
-            m_current_bb->emplace_back(std::make_unique<BinInstr>(opcode, lhs, rhs))->get());
+            m_current_bb->emplace_back(std::make_unique<BinInstr>(type, lhs, rhs))->get());
     }
 
     BinInstr *create_add(const Value *lhs, const Value *rhs) {
-        return create_bin_instr(BinInstr::Opcode::kAdd, lhs, rhs);
+        return create_bin_instr(InstrType::kAdd, lhs, rhs);
     }
 
     BinInstr *create_mul(const Value *lhs, const Value *rhs) {
-        return create_bin_instr(BinInstr::Opcode::kMul, lhs, rhs);
+        return create_bin_instr(InstrType::kMul, lhs, rhs);
     }
 
-    CmpInstr *create_cmp_instr(CmpInstr::Opcode opcode, const Value *lhs, const Value *rhs) {
-        assert(m_current_bb && "current basic block is nullptr");
-        assert(lhs && "lhs value is nullptr");
-        assert(rhs && "rhs value is nullptr");
-
-        return static_cast<CmpInstr *>(
-            m_current_bb->emplace_back(std::make_unique<CmpInstr>(opcode, lhs, rhs))->get());
-    }
-
-    CmpInstr *create_cmp_le(const Value *lhs, const Value *rhs) {
-        return create_cmp_instr(CmpInstr::Opcode::kLessEqual, lhs, rhs);
+    BinInstr *create_cmp_le(const Value *lhs, const Value *rhs) {
+        return create_bin_instr(InstrType::kCmpLessEqual, lhs, rhs);
     }
 
     JumpInstr *create_jump(BasicBlock *target_bb) {
         assert(m_current_bb && "current basic block is nullptr");
         assert(target_bb && "target is nullptr");
 
-        m_current_bb->add_succ_bb(target_bb);
-        target_bb->add_pred_bb(m_current_bb);
+        m_current_bb->set_succ_bb(target_bb);
+        target_bb->emplace_back_pred_bb(m_current_bb);
 
         return static_cast<JumpInstr *>(
-            m_current_bb->emplace_back(std::make_unique<JumpInstr>(target_bb))->get());
+            m_current_bb->emplace_back(std::make_unique<JumpInstr>())->get());
     }
 
     PhiInstr *create_phi() {
@@ -96,15 +87,14 @@ class Builder final {
         assert(true_bb && "true_bb block is nullptr");
         assert(false_bb && "false_bb is nullptr");
 
-        m_current_bb->add_succ_bb(true_bb);
-        m_current_bb->add_succ_bb(false_bb);
+        m_current_bb->set_succ_bb(true_bb, 0);
+        m_current_bb->set_succ_bb(false_bb, 1);
 
-        true_bb->add_pred_bb(m_current_bb);
-        false_bb->add_pred_bb(m_current_bb);
+        true_bb->emplace_back_pred_bb(m_current_bb);
+        false_bb->emplace_back_pred_bb(m_current_bb);
 
         return static_cast<BranchInstr *>(
-            m_current_bb->emplace_back(std::make_unique<BranchInstr>(cond, true_bb, false_bb))
-                ->get());
+            m_current_bb->emplace_back(std::make_unique<BranchInstr>(cond))->get());
     }
 
     ReturnInstr *create_ret(const Value *ret) {

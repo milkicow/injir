@@ -20,19 +20,15 @@ TEST(Builder, Factorial) {
     ASSERT_NE(factorial, nullptr);
     ASSERT_NE(nval0, nullptr);
 
-    auto *bb_entry = builder.create_bb("entry");
-    auto *bb_cond = builder.create_bb("cond");
-    auto *bb_loop = builder.create_bb("loop");
-    auto *bb_ret = builder.create_bb("ret");
+    auto *bb_entry = builder.create_bb();
+    auto *bb_cond = builder.create_bb();
+    auto *bb_loop = builder.create_bb();
+    auto *bb_ret = builder.create_bb();
 
     ASSERT_NE(bb_entry, nullptr);
     ASSERT_NE(bb_cond, nullptr);
     ASSERT_NE(bb_loop, nullptr);
     ASSERT_NE(bb_ret, nullptr);
-    ASSERT_EQ(bb_entry->name(), "entry");
-    ASSERT_EQ(bb_cond->name(), "cond");
-    ASSERT_EQ(bb_loop->name(), "loop");
-    ASSERT_EQ(bb_ret->name(), "ret");
 
     builder.set_insert_point(factorial, bb_entry);
     // u64 fact(i64 val0):

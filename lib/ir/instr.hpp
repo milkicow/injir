@@ -13,8 +13,10 @@
 namespace injir {
 
 enum class InstrType : instr_type_t {
-    kBinary,
-    kCompare,
+    kAdd,
+    kMul,
+    kCmpLess,
+    kCmpLessEqual,
     kBranch,
     kReturn,
     kPhi,
@@ -28,63 +30,32 @@ class Instr : public Value {
 
   public:
     explicit Instr(InstrType type) : m_type(type) {}
-    virtual ~Instr() = default;
+    ~Instr() override = default;
 
     [[nodiscard]] InstrType type() const noexcept { return m_type; }
 };
 
 class BinInstr final : public Instr {
-  public:
-    enum class Opcode : opcode_t {
-        kAdd,
-        kMul,
-    };
-
   private:
-    Opcode m_opcode;
-
     const Value *m_lhs;
     const Value *m_rhs;
 
   public:
-    explicit BinInstr(Opcode opcode, const Value *lhs, const Value *rhs)
-        : Instr(InstrType::kBinary), m_opcode(opcode), m_lhs(lhs), m_rhs(rhs) {}
+    explicit BinInstr(InstrType type, const Value *lhs, const Value *rhs)
+        : Instr(type), m_lhs(lhs), m_rhs(rhs) {}
 };
 
-class CmpInstr final : public Instr {
+class JumpInstr final : public Instr {
   public:
-    enum class Opcode : opcode_t {
-        kLess,
-        kLessEqual,
-        kEqual,
-        kNotEqual,
-        kGreaterEqual,
-        kGreater,
-    };
-
-  private:
-    Opcode m_opcode;
-
-    const Value *m_lhs;
-    const Value *m_rhs;
-
-  public:
-    explicit CmpInstr(Opcode opcode, const Value *lhs, const Value *rhs)
-        : Instr(InstrType::kCompare), m_lhs(lhs), m_rhs(rhs) {}
+    explicit JumpInstr() : Instr(InstrType::kJump) {}
 };
-
-class BasicBlock;
 
 class BranchInstr final : public Instr {
   private:
     const Value *m_cond;
 
-    const BasicBlock *m_true_bb;
-    const BasicBlock *m_false_bb;
-
   public:
-    explicit BranchInstr(const Value *cond, const BasicBlock *true_bb, const BasicBlock *false_bb)
-        : Instr(InstrType::kBranch), m_cond(cond), m_true_bb(true_bb), m_false_bb(false_bb) {}
+    explicit BranchInstr(const Value *cond) : Instr(InstrType::kBranch), m_cond(cond) {}
 };
 
 class ReturnInstr final : public Instr {
@@ -94,6 +65,8 @@ class ReturnInstr final : public Instr {
   public:
     explicit ReturnInstr(const Value *ret) : Instr(InstrType::kReturn), m_ret(ret) {}
 };
+
+class BasicBlock;
 
 class PhiInstr final : public Instr {
   private:
@@ -109,14 +82,6 @@ class PhiInstr final : public Instr {
 
         m_incoming.emplace_back(val, bb);
     }
-};
-
-class JumpInstr final : public Instr {
-  private:
-    const BasicBlock *m_bb;
-
-  public:
-    explicit JumpInstr(const BasicBlock *bb) : Instr(InstrType::kJump), m_bb(bb) {}
 };
 
 } // namespace injir
