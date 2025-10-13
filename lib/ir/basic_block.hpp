@@ -3,9 +3,12 @@
 
 #include <array>
 #include <cassert>
+#include <iostream>
 #include <list>
+#include <sstream>
 #include <vector>
 
+#include "common.hpp"
 #include "instr.hpp"
 
 namespace injir {
@@ -26,6 +29,8 @@ class BasicBlock {
 
     BBPreds m_preds;
     BBSuccs m_succs;
+
+    marker_t m_marker = 0;
 
   public:
     BasicBlock() = default;
@@ -91,9 +96,34 @@ class BasicBlock {
         m_succs[pos] = succ_bb;
     }
 
-    [[nodiscard]] const BasicBlock *get_true_successor() const noexcept { return m_succs[0]; }
-    [[nodiscard]] const BasicBlock *get_false_successor() const noexcept { return m_succs[1]; }
+    [[nodiscard]] BasicBlock *get_true_successor() const noexcept { return m_succs[0]; }
+    [[nodiscard]] BasicBlock *get_false_successor() const noexcept { return m_succs[1]; }
+
+    // marker interface
+    void set_marker(marker_t marker) noexcept { m_marker = marker; }
+    [[nodiscard]] marker_t get_marker() const noexcept { return m_marker; }
 };
+
+std::string format_bb(const BasicBlock &bb) {
+    std::ostringstream bb_oss{};
+
+    bb_oss << "Basic block: {\n";
+    bb_oss << "\taddr: " << &bb << '\n';
+    bb_oss << "\tsize: " << bb.size() << '\n';
+
+    bb_oss << "\tpredecessors:\n";
+    for (auto pred = bb.preds_begin(), pred_end = bb.preds_end(); pred != pred_end; ++pred) {
+        bb_oss << "\t\t" << *pred << '\n';
+    }
+
+    bb_oss << "\tsuccessors:\n";
+    bb_oss << "\t\ttrue successor: " << bb.get_true_successor() << '\n';
+    bb_oss << "\t\tfalse successor: " << bb.get_false_successor() << '\n';
+
+    bb_oss << "}\n";
+
+    return bb_oss.str();
+}
 
 } // namespace injir
 

@@ -29,6 +29,12 @@ class Builder final {
         m_current_bb = bb;
     }
 
+    void set_insert_point(BasicBlock *bb) {
+        assert(m_current_func && "m_current_function is nullptr");
+        assert(bb && "basic block is nullptr");
+        m_current_bb = bb;
+    }
+
     Function *create_function(Type ret_type, std::initializer_list<Value> args) {
         assert(m_context && "context is nullptr");
 

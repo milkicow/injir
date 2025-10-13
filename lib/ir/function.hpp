@@ -28,6 +28,8 @@ class Function final {
         return &m_args[index];
     }
 
+    [[nodiscard]] std::size_t size() const noexcept { return m_bbs.size(); }
+
     using iterator = BasicBlocks::iterator;
     using const_iterator = BasicBlocks::const_iterator;
 

@@ -8,7 +8,7 @@ namespace injir {
 enum class Type : type_t {
     kInt,
     kFloat,
-
+    kVoid,
     kUnknown,
 };
 }
