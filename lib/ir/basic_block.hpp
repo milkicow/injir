@@ -30,7 +30,7 @@ class BasicBlock {
     BBPreds m_preds;
     BBSuccs m_succs;
 
-    marker_t m_marker = 0;
+    Marker m_marker = Marker::no_marker;
 
   public:
     BasicBlock() = default;
@@ -100,8 +100,8 @@ class BasicBlock {
     [[nodiscard]] BasicBlock *get_false_successor() const noexcept { return m_succs[1]; }
 
     // marker interface
-    void set_marker(marker_t marker) noexcept { m_marker = marker; }
-    [[nodiscard]] marker_t get_marker() const noexcept { return m_marker; }
+    void set_marker(Marker marker) noexcept { m_marker = marker; }
+    [[nodiscard]] Marker get_marker() const noexcept { return m_marker; }
 };
 
 std::string format_bb(const BasicBlock &bb) {

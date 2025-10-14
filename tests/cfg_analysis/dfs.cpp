@@ -8,39 +8,33 @@
 
 using namespace injir;
 
-TEST_F(CFGTestExample1, DFS) {
-    std::vector<BasicBlock *> dfs_vector{};
-    cfg_analysis::dfs(bb_a, dfs_vector);
-
-    std::vector<BasicBlock *> expected{bb_a, bb_b, bb_c, bb_d, bb_f, bb_e, bb_g};
+static void check_dfs(const std::vector<BasicBlock *> &dfs_vector,
+                      const std::vector<BasicBlock *> &expected) {
     ASSERT_EQ(dfs_vector.size(), expected.size());
 
     for (const auto &[dfs_bb, exp_bb] : std::views::zip(dfs_vector, expected)) {
         ASSERT_EQ(dfs_bb, exp_bb);
     }
+}
+
+TEST_F(CFGTestExample1, DFS) {
+    auto dfs_vector = cfg_analysis::dfs(bb_a);
+
+    const std::vector<BasicBlock *> expected{bb_a, bb_b, bb_c, bb_d, bb_f, bb_e, bb_g};
+    check_dfs(dfs_vector, expected);
 }
 
 TEST_F(CFGTestExample2, DFS) {
-    std::vector<BasicBlock *> dfs_vector{};
-    cfg_analysis::dfs(bb_a, dfs_vector);
+    auto dfs_vector = cfg_analysis::dfs(bb_a);
 
-    std::vector<BasicBlock *> expected{bb_a, bb_b, bb_c, bb_d, bb_e, bb_f,
-                                       bb_g, bb_h, bb_i, bb_k, bb_j};
-    ASSERT_EQ(dfs_vector.size(), expected.size());
-
-    for (const auto &[dfs_bb, exp_bb] : std::views::zip(dfs_vector, expected)) {
-        ASSERT_EQ(dfs_bb, exp_bb);
-    }
+    const std::vector<BasicBlock *> expected{bb_a, bb_b, bb_c, bb_d, bb_e, bb_f,
+                                             bb_g, bb_h, bb_i, bb_k, bb_j};
+    check_dfs(dfs_vector, expected);
 }
 
 TEST_F(CFGTestExample3, DFS) {
-    std::vector<BasicBlock *> dfs_vector{};
-    cfg_analysis::dfs(bb_a, dfs_vector);
+    auto dfs_vector = cfg_analysis::dfs(bb_a);
 
-    std::vector<BasicBlock *> expected{bb_a, bb_b, bb_e, bb_f, bb_h, bb_i, bb_g, bb_c, bb_d};
-    ASSERT_EQ(dfs_vector.size(), expected.size());
-
-    for (const auto &[dfs_bb, exp_bb] : std::views::zip(dfs_vector, expected)) {
-        ASSERT_EQ(dfs_bb, exp_bb);
-    }
+    const std::vector<BasicBlock *> expected{bb_a, bb_b, bb_e, bb_f, bb_h, bb_i, bb_g, bb_c, bb_d};
+    check_dfs(dfs_vector, expected);
 }
