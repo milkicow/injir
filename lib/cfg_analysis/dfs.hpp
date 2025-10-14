@@ -12,25 +12,42 @@ namespace injir {
 
 namespace cfg_analysis {
 
-void dfs(BasicBlock *basic_block, std::vector<BasicBlock *> &dfs_vector) {
+void dfs_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &dfs_vector) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
-    marker_t dfs_marker = 0x52;
-    basic_block->set_marker(dfs_marker);
+    basic_block->set_marker(Marker::dfs);
 
     dfs_vector.push_back(basic_block);
 
-    auto process_successor = [dfs_marker, &dfs_vector](auto *basic_block_successor) {
+    auto process_successor = [&dfs_vector](auto *basic_block_successor) {
         if (basic_block_successor == nullptr) {
             return;
         }
-        if (basic_block_successor->get_marker() != dfs_marker) {
-            dfs(basic_block_successor, dfs_vector);
+        auto bb_marker = basic_block_successor->get_marker();
+        if (bb_marker != Marker::removed && bb_marker != Marker::dfs) {
+            dfs_algorithm(basic_block_successor, dfs_vector);
         }
     };
 
     process_successor(basic_block->get_true_successor());
     process_successor(basic_block->get_false_successor());
+}
+
+std::vector<BasicBlock *> dfs(BasicBlock *basic_block) {
+    assert(basic_block != nullptr && "basic block is nullptr");
+
+    if (basic_block->get_marker() == Marker::removed) {
+        return {};
+    }
+
+    std::vector<BasicBlock *> dfs_vector{};
+    dfs_algorithm(basic_block, dfs_vector);
+
+    for (auto *bb : dfs_vector) {
+        bb->set_marker(Marker::no_marker);
+    }
+
+    return dfs_vector;
 }
 
 } // namespace cfg_analysis

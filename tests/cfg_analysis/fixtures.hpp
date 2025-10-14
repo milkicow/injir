@@ -122,16 +122,16 @@ class CFGTestExample3 : public ::testing::Test {
         builder.create_br(builder.create_int(1), bb_e, bb_c);
 
         builder.set_insert_point(bb_e);
-        builder.create_jump(bb_f);
+        builder.create_br(builder.create_int(2), bb_f, bb_d);
 
         builder.set_insert_point(bb_f);
-        builder.create_br(builder.create_int(2), bb_b, bb_h);
+        builder.create_br(builder.create_int(3), bb_b, bb_h);
 
         builder.set_insert_point(bb_h);
-        builder.create_br(builder.create_int(3), bb_i, bb_g);
+        builder.create_br(builder.create_int(4), bb_i, bb_g);
 
         builder.set_insert_point(bb_g);
-        builder.create_br(builder.create_int(4), bb_i, bb_c);
+        builder.create_br(builder.create_int(5), bb_i, bb_c);
 
         builder.set_insert_point(bb_c);
         builder.create_jump(bb_d);
