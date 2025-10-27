@@ -144,4 +144,107 @@ class CFGTestExample3 : public ::testing::Test {
     BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{}, *bb_f{}, *bb_g{}, *bb_h{}, *bb_i{};
 };
 
+class CFGTestExample4 : public ::testing::Test {
+  protected:
+    void SetUp() override {
+        Builder builder{&context};
+        auto *test_func = builder.create_function(Type::kVoid, {});
+
+        bb_a = builder.create_bb();
+        bb_b = builder.create_bb();
+        bb_c = builder.create_bb();
+        bb_d = builder.create_bb();
+        bb_e = builder.create_bb();
+
+        builder.set_insert_point(bb_a);
+        builder.create_jump(bb_b);
+
+        builder.set_insert_point(bb_b);
+        builder.create_br(builder.create_int(1), bb_c, bb_d);
+
+        builder.set_insert_point(bb_d);
+        builder.create_jump(bb_e);
+
+        builder.set_insert_point(bb_e);
+        builder.create_jump(bb_b);
+    }
+
+    Context context{};
+    BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{};
+};
+
+class CFGTestExample5 : public ::testing::Test {
+  protected:
+    void SetUp() override {
+        Builder builder{&context};
+        auto *test_func = builder.create_function(Type::kVoid, {});
+
+        bb_a = builder.create_bb();
+        bb_b = builder.create_bb();
+        bb_c = builder.create_bb();
+        bb_d = builder.create_bb();
+        bb_e = builder.create_bb();
+        bb_f = builder.create_bb();
+
+        builder.set_insert_point(bb_a);
+        builder.create_jump(bb_b);
+
+        builder.set_insert_point(bb_b);
+        builder.create_jump(bb_c);
+
+        builder.set_insert_point(bb_c);
+        builder.create_br(builder.create_int(1), bb_d, bb_e);
+
+        builder.set_insert_point(bb_e);
+        builder.create_br(builder.create_int(2), bb_d, bb_f);
+
+        builder.set_insert_point(bb_f);
+        builder.create_jump(bb_b);
+    }
+
+    Context context{};
+    BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{}, *bb_f{};
+};
+
+class CFGTestExample6 : public ::testing::Test {
+  protected:
+    void SetUp() override {
+        Builder builder{&context};
+        auto *test_func = builder.create_function(Type::kVoid, {});
+
+        bb_a = builder.create_bb();
+        bb_b = builder.create_bb();
+        bb_c = builder.create_bb();
+        bb_d = builder.create_bb();
+        bb_e = builder.create_bb();
+        bb_f = builder.create_bb();
+        bb_g = builder.create_bb();
+        bb_h = builder.create_bb();
+
+        builder.set_insert_point(bb_a);
+        builder.create_jump(bb_b);
+
+        builder.set_insert_point(bb_b);
+        builder.create_br(builder.create_int(1), bb_c, bb_d);
+
+        builder.set_insert_point(bb_c);
+        builder.create_br(builder.create_int(2), bb_e, bb_f);
+
+        builder.set_insert_point(bb_d);
+        builder.create_jump(bb_f);
+
+        builder.set_insert_point(bb_f);
+        builder.create_jump(bb_g);
+
+        builder.set_insert_point(bb_g);
+        builder.create_br(builder.create_int(3), bb_b, bb_h);
+
+        builder.set_insert_point(bb_h);
+        builder.create_jump(bb_a);
+    }
+
+    Context context{};
+    BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{}, *bb_f{}, *bb_g{}, *bb_h{};
+};
+
 #endif // FIXTURES_HPP
