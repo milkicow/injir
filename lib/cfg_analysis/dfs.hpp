@@ -15,18 +15,17 @@ namespace cfg_analysis {
 void dfs_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &dfs_vector) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
-    basic_block->set_marker(Marker::dfs);
+    basic_block->add_marker(Marker::dfs);
 
     dfs_vector.push_back(basic_block);
 
     auto process_successor = [&dfs_vector](auto *basic_block_successor) {
-        if (basic_block_successor == nullptr) {
+        if (basic_block_successor == nullptr ||
+            basic_block_successor->has_marker(Marker::removed) ||
+            basic_block_successor->has_marker(Marker::dfs)) {
             return;
         }
-        auto bb_marker = basic_block_successor->get_marker();
-        if (bb_marker != Marker::removed && bb_marker != Marker::dfs) {
-            dfs_algorithm(basic_block_successor, dfs_vector);
-        }
+        dfs_algorithm(basic_block_successor, dfs_vector);
     };
 
     process_successor(basic_block->get_true_successor());
@@ -36,7 +35,7 @@ void dfs_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &dfs_vecto
 std::vector<BasicBlock *> dfs(BasicBlock *basic_block) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
-    if (basic_block->get_marker() == Marker::removed) {
+    if (basic_block->has_marker(Marker::removed)) {
         return {};
     }
 
@@ -44,7 +43,7 @@ std::vector<BasicBlock *> dfs(BasicBlock *basic_block) {
     dfs_algorithm(basic_block, dfs_vector);
 
     for (auto *bb : dfs_vector) {
-        bb->set_marker(Marker::no_marker);
+        bb->delete_marker(Marker::dfs);
     }
 
     return dfs_vector;

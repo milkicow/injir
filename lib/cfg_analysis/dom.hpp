@@ -22,10 +22,10 @@ dom_tree_t dom(BasicBlock *root_basic_block) {
     for (auto *dom_basic_block : dfs_vector) {
         dom_tree[dom_basic_block] = {};
 
-        dom_basic_block->set_marker(Marker::removed);
+        dom_basic_block->add_marker(Marker::removed);
 
         auto reachable = dfs(root_basic_block);
-        dom_basic_block->set_marker(Marker::no_marker);
+        dom_basic_block->delete_marker(Marker::removed);
 
         for (auto *basic_block : dfs_vector) {
             if (basic_block != dom_basic_block &&

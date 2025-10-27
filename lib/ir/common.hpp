@@ -10,12 +10,20 @@ using instr_type_t = std::uint32_t;
 using type_t = std::uint32_t;
 using marker_t = std::uint64_t;
 
-enum class Marker : marker_t {
+enum Marker : marker_t {
     no_marker = 0,
+    // Algorithms markers
     dfs = 1 << 0,
     rpo = 1 << 1,
+    // Universal colour markers
+    black = 1 << 2,
+    grey = 1 << 3,
+    blue = 1 << 4,
+    red = 1 << 5,
+    green = 1 << 6,
+    purple = 1 << 7,
 
-    removed = 1 << 2,
+    removed = 1 << 8,
 };
 
 using i64 = std::uint64_t;

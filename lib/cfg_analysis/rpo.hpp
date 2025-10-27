@@ -16,17 +16,16 @@ void rpo_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &rpo_vecto
                    std::size_t &basic_blocks_counter) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
-    basic_block->set_marker(Marker::rpo);
+    basic_block->add_marker(Marker::rpo);
 
     auto process_successor = [&rpo_vector,
                               &basic_blocks_counter](BasicBlock *basic_block_successor) {
-        if (basic_block_successor == nullptr) {
+        if (basic_block_successor == nullptr ||
+            basic_block_successor->has_marker(Marker::removed) ||
+            basic_block_successor->has_marker(Marker::rpo)) {
             return;
         }
-        auto bb_marker = basic_block_successor->get_marker();
-        if (bb_marker != Marker::removed && bb_marker != Marker::rpo) {
-            rpo_algorithm(basic_block_successor, rpo_vector, basic_blocks_counter);
-        }
+        rpo_algorithm(basic_block_successor, rpo_vector, basic_blocks_counter);
     };
 
     process_successor(basic_block->get_true_successor());
@@ -40,7 +39,7 @@ std::vector<BasicBlock *> rpo(BasicBlock *basic_block, std::size_t basic_blocks_
     assert(basic_block != nullptr && "basic block is nullptr");
     assert(basic_blocks_counter != 0 && "basic_blocks_counter is zero");
 
-    if (basic_block->get_marker() == Marker::removed) {
+    if (basic_block->has_marker(Marker::removed)) {
         return {};
     }
 
@@ -48,7 +47,7 @@ std::vector<BasicBlock *> rpo(BasicBlock *basic_block, std::size_t basic_blocks_
     rpo_algorithm(basic_block, rpo_vector, basic_blocks_counter);
 
     for (auto *bb : rpo_vector) {
-        bb->set_marker(Marker::no_marker);
+        bb->delete_marker(Marker::rpo);
     }
 
     return rpo_vector;
