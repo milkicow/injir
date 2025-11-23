@@ -4,15 +4,14 @@
 #include <gtest/gtest.h>
 
 #include "ir/builder.hpp"
-#include "ir/context.hpp"
 
 using namespace injir;
 
 class CFGTestExample1 : public ::testing::Test {
   protected:
     void SetUp() override {
-        Builder builder{&context};
-        auto *test_func = builder.create_function(Type::kVoid, {});
+        Builder builder{};
+        builder.set_insert_point(&test_func);
 
         bb_a = builder.create_bb();
         bb_b = builder.create_bb();
@@ -41,15 +40,15 @@ class CFGTestExample1 : public ::testing::Test {
         builder.create_jump(bb_d);
     }
 
-    Context context{};
+    Function test_func{Type::kVoid, {}};
     BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{}, *bb_f{}, *bb_g{};
 };
 
 class CFGTestExample2 : public ::testing::Test {
   protected:
     void SetUp() override {
-        Builder builder{&context};
-        auto *test_func = builder.create_function(Type::kVoid, {});
+        Builder builder{};
+        builder.set_insert_point(&test_func);
 
         bb_a = builder.create_bb();
         bb_b = builder.create_bb();
@@ -94,7 +93,7 @@ class CFGTestExample2 : public ::testing::Test {
         builder.create_jump(bb_k);
     }
 
-    Context context{};
+    Function test_func{Type::kVoid, {}};
     BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{}, *bb_f{}, *bb_g{}, *bb_h{}, *bb_i{},
         *bb_j{}, *bb_k{};
 };
@@ -102,8 +101,8 @@ class CFGTestExample2 : public ::testing::Test {
 class CFGTestExample3 : public ::testing::Test {
   protected:
     void SetUp() override {
-        Builder builder{&context};
-        auto *test_func = builder.create_function(Type::kVoid, {});
+        Builder builder{};
+        builder.set_insert_point(&test_func);
 
         bb_a = builder.create_bb();
         bb_b = builder.create_bb();
@@ -140,15 +139,15 @@ class CFGTestExample3 : public ::testing::Test {
         builder.create_jump(bb_g);
     }
 
-    Context context{};
+    Function test_func{Type::kVoid, {}};
     BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{}, *bb_f{}, *bb_g{}, *bb_h{}, *bb_i{};
 };
 
 class CFGTestExample4 : public ::testing::Test {
   protected:
     void SetUp() override {
-        Builder builder{&context};
-        auto *test_func = builder.create_function(Type::kVoid, {});
+        Builder builder{};
+        builder.set_insert_point(&test_func);
 
         bb_a = builder.create_bb();
         bb_b = builder.create_bb();
@@ -169,15 +168,15 @@ class CFGTestExample4 : public ::testing::Test {
         builder.create_jump(bb_b);
     }
 
-    Context context{};
+    Function test_func{Type::kVoid, {}};
     BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{};
 };
 
 class CFGTestExample5 : public ::testing::Test {
   protected:
     void SetUp() override {
-        Builder builder{&context};
-        auto *test_func = builder.create_function(Type::kVoid, {});
+        Builder builder{};
+        builder.set_insert_point(&test_func);
 
         bb_a = builder.create_bb();
         bb_b = builder.create_bb();
@@ -202,15 +201,15 @@ class CFGTestExample5 : public ::testing::Test {
         builder.create_jump(bb_b);
     }
 
-    Context context{};
+    Function test_func{Type::kVoid, {}};
     BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{}, *bb_f{};
 };
 
 class CFGTestExample6 : public ::testing::Test {
   protected:
     void SetUp() override {
-        Builder builder{&context};
-        auto *test_func = builder.create_function(Type::kVoid, {});
+        Builder builder{};
+        builder.set_insert_point(&test_func);
 
         bb_a = builder.create_bb();
         bb_b = builder.create_bb();
@@ -243,7 +242,7 @@ class CFGTestExample6 : public ::testing::Test {
         builder.create_jump(bb_a);
     }
 
-    Context context{};
+    Function test_func{Type::kVoid, {}};
     BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{}, *bb_f{}, *bb_g{}, *bb_h{};
 };
 

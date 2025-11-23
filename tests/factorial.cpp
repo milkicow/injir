@@ -1,24 +1,17 @@
-
 #include <gtest/gtest.h>
 
 #include "ir/basic_block.hpp"
 #include "ir/builder.hpp"
-#include "ir/context.hpp"
 #include "ir/instr.hpp"
 #include "ir/type.hpp"
-#include "ir/value.hpp"
 
 using namespace injir;
 
 TEST(Builder, Factorial) {
-    Context context{};
-    Builder builder(&context);
+    Builder builder{};
 
-    auto *factorial = builder.create_function(Type::kInt, {Type::kInt});
-    auto *nval0 = factorial->get_arg(0);
-
-    ASSERT_NE(factorial, nullptr);
-    ASSERT_NE(nval0, nullptr);
+    Function factorial{Type::kInt, {Type::kInt}};
+    builder.set_insert_point(&factorial);
 
     auto *bb_entry = builder.create_bb();
     auto *bb_cond = builder.create_bb();
@@ -30,28 +23,26 @@ TEST(Builder, Factorial) {
     ASSERT_NE(bb_loop, nullptr);
     ASSERT_NE(bb_ret, nullptr);
 
-    builder.set_insert_point(factorial, bb_entry);
+    builder.set_insert_point(bb_entry);
+
+    auto *nval0 = builder.create_arg(factorial.get_arg_type(0));
+    ASSERT_NE(nval0, nullptr);
+
     // u64 fact(i64 val0):
-    auto *int_const_0 = builder.create_int(0);
-    auto *int_const_1 = builder.create_int(1);
-    auto *int_const_2 = builder.create_int(2);
-
-    ASSERT_NE(int_const_0, nullptr);
-    ASSERT_NE(int_const_1, nullptr);
-    ASSERT_NE(int_const_2, nullptr);
-
-    auto *nval1 = builder.create_add(int_const_1, int_const_0);
-    //     val1 = add i64 1, 0
-    auto *nval2 = builder.create_add(int_const_2, int_const_0);
-    //     val2 = add i64 2, 0
-    builder.create_jump(bb_cond);
-    //    jmp cond
+    auto *nval1 = builder.create_int(1);
+    //     val1 = const i64 1
+    auto *nval2 = builder.create_int(2);
+    //     val2 = const i64 2
 
     ASSERT_NE(nval1, nullptr);
     ASSERT_NE(nval2, nullptr);
-    ASSERT_EQ(bb_entry->size(), 3);
 
-    builder.set_insert_point(factorial, bb_cond);
+    builder.create_jump(bb_cond);
+    //    jmp cond
+
+    ASSERT_EQ(bb_entry->size(), 4);
+
+    builder.set_insert_point(&factorial, bb_cond);
     //  cond:
     auto *nval3 = builder.create_phi();
     //    val3 = phi i64 [val2, entry], [val7, loop]
@@ -67,23 +58,20 @@ TEST(Builder, Factorial) {
     ASSERT_NE(nval5, nullptr);
     ASSERT_EQ(bb_cond->size(), 4);
 
-    builder.set_insert_point(factorial, bb_loop);
+    builder.set_insert_point(&factorial, bb_loop);
     //  loop:
-    auto *nval6 = builder.create_add(int_const_1, int_const_0);
-    //    val6 = add i64 1, 0
-    auto *nval7 = builder.create_add(nval3, nval6);
-    //    val7 = add i64 val3, val6
+    auto *nval7 = builder.create_add(nval3, nval1);
+    //    val7 = add i64 val3, val1
     auto *nval8 = builder.create_mul(nval4, nval7);
     //    val8 = mul i64 val4, val7
     builder.create_jump(bb_cond);
     //    jmp cond
 
-    ASSERT_NE(nval6, nullptr);
     ASSERT_NE(nval7, nullptr);
     ASSERT_NE(nval8, nullptr);
-    ASSERT_EQ(bb_loop->size(), 4);
+    ASSERT_EQ(bb_loop->size(), 3);
 
-    builder.set_insert_point(factorial, bb_ret);
+    builder.set_insert_point(&factorial, bb_ret);
     // ret:
     builder.create_ret(nval4);
     //    ret val4
@@ -99,7 +87,7 @@ TEST(Builder, Factorial) {
     //    val4 = phi i64 [val1, entry], [val8, loop]
 
     size_t bb_count = 0;
-    for (auto it = factorial->begin(); it != factorial->end(); ++it) {
+    for (auto it = factorial.begin(); it != factorial.end(); ++it) {
         ++bb_count;
     }
     ASSERT_EQ(bb_count, 4);
