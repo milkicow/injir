@@ -49,24 +49,36 @@ class Builder final {
         return &(*bb_it);
     }
 
-    BinInstr *create_bin_instr(InstrType type, const Instr *lhs, const Instr *rhs) {
+    BinInstr *create_bin_instr(InstrType type, Instr *lhs, Instr *rhs) {
         assert(m_current_bb && "current basic block is nullptr");
         assert(lhs && "lhs instr is nullptr");
         assert(rhs && "rhs instr is nullptr");
 
-        return static_cast<BinInstr *>(
-            m_current_bb->emplace_back(std::make_unique<BinInstr>(type, lhs, rhs))->get());
+        auto *instr = m_current_bb->emplace_back(std::make_unique<BinInstr>(type, lhs, rhs))->get();
+
+        lhs->add_user(instr);
+        rhs->add_user(instr);
+
+        return static_cast<BinInstr *>(instr);
     }
 
-    BinInstr *create_add(const Instr *lhs, const Instr *rhs) {
+    BinInstr *create_add(Instr *lhs, Instr *rhs) {
         return create_bin_instr(InstrType::kAdd, lhs, rhs);
     }
 
-    BinInstr *create_mul(const Instr *lhs, const Instr *rhs) {
+    BinInstr *create_mul(Instr *lhs, Instr *rhs) {
         return create_bin_instr(InstrType::kMul, lhs, rhs);
     }
 
-    BinInstr *create_cmp_le(const Instr *lhs, const Instr *rhs) {
+    BinInstr *create_or(Instr *lhs, Instr *rhs) {
+        return create_bin_instr(InstrType::kOr, lhs, rhs);
+    }
+
+    BinInstr *create_shl(Instr *lhs, Instr *rhs) {
+        return create_bin_instr(InstrType::kShl, lhs, rhs);
+    }
+
+    BinInstr *create_cmp_le(Instr *lhs, Instr *rhs) {
         return create_bin_instr(InstrType::kCmpLessEqual, lhs, rhs);
     }
 
@@ -88,7 +100,7 @@ class Builder final {
             m_current_bb->emplace_back(std::make_unique<PhiInstr>())->get());
     }
 
-    BranchInstr *create_br(const Instr *cond, BasicBlock *true_bb, BasicBlock *false_bb) {
+    BranchInstr *create_br(Instr *cond, BasicBlock *true_bb, BasicBlock *false_bb) {
         assert(m_current_bb && "current basic block is nullptr");
         assert(true_bb && "true_bb block is nullptr");
         assert(false_bb && "false_bb is nullptr");
@@ -99,16 +111,20 @@ class Builder final {
         true_bb->emplace_back_pred_bb(m_current_bb);
         false_bb->emplace_back_pred_bb(m_current_bb);
 
-        return static_cast<BranchInstr *>(
-            m_current_bb->emplace_back(std::make_unique<BranchInstr>(cond))->get());
+        auto *instr = m_current_bb->emplace_back(std::make_unique<BranchInstr>(cond))->get();
+        cond->add_user(instr);
+
+        return static_cast<BranchInstr *>(instr);
     }
 
-    ReturnInstr *create_ret(const Instr *ret) {
+    ReturnInstr *create_ret(Instr *ret) {
         assert(m_current_bb && "current basic block is nullptr");
         assert(ret && "return instr is nullptr");
 
-        return static_cast<ReturnInstr *>(
-            m_current_bb->emplace_back(std::make_unique<ReturnInstr>(ret))->get());
+        auto *instr = m_current_bb->emplace_back(std::make_unique<ReturnInstr>(ret))->get();
+        ret->add_user(instr);
+
+        return static_cast<ReturnInstr *>(instr);
     }
 
     ConstInstr *create_int(i64 data) {
