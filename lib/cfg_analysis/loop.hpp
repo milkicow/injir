@@ -43,9 +43,6 @@ static void collect_back_edges(BasicBlock *basic_block, loop_tree_t &loop_tree,
         if (basic_block_successor->has_marker(Marker::grey)) {
             auto &loop = loop_tree[basic_block_successor];
 
-            loop.header = basic_block_successor;
-            loop.basic_blocks.push_back(basic_block_successor);
-
             loop.latches.push_back(basic_block);
 
             const auto &header_doms = dom_tree.at(basic_block_successor);
@@ -77,7 +74,6 @@ static void loop_search(BasicBlock *basic_block, Loop &loop, bb_to_loop_t &bb_to
 
     if (inner_bb_loop == nullptr) {
         bb_to_loop[basic_block] = &loop;
-        loop.basic_blocks.push_back(basic_block);
     } else if (inner_bb_loop->outer_loop == nullptr) {
         inner_bb_loop->outer_loop = &loop;
         loop.inner_loops.push_back(inner_bb_loop);
@@ -90,6 +86,7 @@ static void loop_search(BasicBlock *basic_block, Loop &loop, bb_to_loop_t &bb_to
             loop_search(pred_bb, loop, bb_to_loop);
         }
     }
+    loop.basic_blocks.push_back(basic_block);
 }
 
 static void populate_loops(std::vector<BasicBlock *> rpo_vector, loop_tree_t &loop_tree,
@@ -100,6 +97,9 @@ static void populate_loops(std::vector<BasicBlock *> rpo_vector, loop_tree_t &lo
 
     for (auto *basic_block : loop_headers) {
         auto &loop = loop_tree.at(basic_block);
+
+        loop.header = basic_block;
+        loop.basic_blocks.push_back(basic_block);
 
         bb_to_loop[loop.header] = &loop;
 
@@ -123,7 +123,7 @@ static void populate_loops(std::vector<BasicBlock *> rpo_vector, loop_tree_t &lo
     }
 }
 
-loop_tree_t loop_tree(BasicBlock *basic_block) {
+inline loop_tree_t loop_tree(BasicBlock *basic_block) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
     auto dom_tree = dom(basic_block);

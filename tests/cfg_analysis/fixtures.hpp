@@ -246,4 +246,53 @@ class CFGTestExample6 : public ::testing::Test {
     BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{}, *bb_f{}, *bb_g{}, *bb_h{};
 };
 
+class CFGLoopManyLathes : public ::testing::Test {
+  protected:
+    void SetUp() override {
+        Builder builder{};
+        builder.set_insert_point(&test_func);
+
+        bb_a = builder.create_bb();
+        bb_b = builder.create_bb();
+        bb_c = builder.create_bb();
+        bb_d = builder.create_bb();
+        bb_e = builder.create_bb();
+
+        builder.set_insert_point(bb_a);
+        r0 = builder.create_int(0);
+        builder.create_jump(bb_b);
+
+        builder.set_insert_point(bb_b);
+        r1 = builder.create_phi();
+        builder.create_jump(bb_c);
+
+        builder.set_insert_point(bb_c);
+        r2 = builder.create_int(3);
+        r3 = builder.create_cmp_le(r1, r2);
+        builder.create_br(r3, bb_b, bb_d);
+
+        builder.set_insert_point(bb_d);
+        r4 = builder.create_int(-1);
+        r5 = builder.create_add(r1, r4);
+
+        r6 = builder.create_int(3);
+        r7 = builder.create_cmp_le(r5, r6);
+        builder.create_br(r7, bb_b, bb_e);
+
+        builder.set_insert_point(bb_e);
+        r8 = builder.create_add(r5, r5);
+
+        auto *r1_phi = static_cast<PhiInstr *>(r1);
+
+        r1_phi->add_incoming(r0, bb_a);
+        r1_phi->add_incoming(r2, bb_c);
+        r1_phi->add_incoming(r4, bb_d);
+    }
+
+    static constexpr std::size_t basic_block_counter = 5;
+    Function test_func{Type::kVoid, {}};
+    BasicBlock *bb_a{}, *bb_b{}, *bb_c{}, *bb_d{}, *bb_e{};
+    Instr *r0{}, *r1{}, *r2{}, *r3{}, *r4{}, *r5{}, *r6{}, *r7{}, *r8{};
+};
+
 #endif // FIXTURES_HPP

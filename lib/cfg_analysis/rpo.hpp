@@ -8,12 +8,10 @@
 #include "ir/basic_block.hpp"
 #include "ir/common.hpp"
 
-namespace injir {
+namespace injir::cfg_analysis {
 
-namespace cfg_analysis {
-
-void rpo_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &rpo_vector,
-                   std::size_t &basic_blocks_counter) {
+inline void rpo_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &rpo_vector,
+                          std::size_t &basic_blocks_counter) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
     basic_block->add_marker(Marker::rpo);
@@ -28,14 +26,14 @@ void rpo_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &rpo_vecto
         rpo_algorithm(basic_block_successor, rpo_vector, basic_blocks_counter);
     };
 
-    process_successor(basic_block->get_true_successor());
     process_successor(basic_block->get_false_successor());
+    process_successor(basic_block->get_true_successor());
 
     assert(basic_blocks_counter != 0 && "blocks_count is zero");
     rpo_vector[--basic_blocks_counter] = basic_block;
 }
 
-std::vector<BasicBlock *> rpo(BasicBlock *basic_block, std::size_t basic_blocks_counter) {
+inline std::vector<BasicBlock *> rpo(BasicBlock *basic_block, std::size_t basic_blocks_counter) {
     assert(basic_block != nullptr && "basic block is nullptr");
     assert(basic_blocks_counter != 0 && "basic_blocks_counter is zero");
 
@@ -53,7 +51,6 @@ std::vector<BasicBlock *> rpo(BasicBlock *basic_block, std::size_t basic_blocks_
     return rpo_vector;
 }
 
-} // namespace cfg_analysis
-} // namespace injir
+} // namespace injir::cfg_analysis
 
 #endif // RPO_HPP

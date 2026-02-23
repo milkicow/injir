@@ -2,7 +2,6 @@
 #include <gtest/gtest.h>
 
 #include "cfg_analysis/loop.hpp"
-#include "ir/basic_block.hpp"
 
 #include "fixtures.hpp"
 
@@ -23,8 +22,10 @@ static void loop_eq(const cfg_analysis::Loop &loop, const cfg_analysis::Loop &ex
     }
 
     ASSERT_EQ(loop.basic_blocks.size(), expected.basic_blocks.size());
-    EXPECT_TRUE(std::is_permutation(loop.basic_blocks.begin(), loop.basic_blocks.end(),
-                                    expected.basic_blocks.begin()));
+    EXPECT_EQ(loop.basic_blocks.size(), expected.basic_blocks.size());
+
+    EXPECT_TRUE(std::equal(loop.basic_blocks.begin(), loop.basic_blocks.end(),
+                           expected.basic_blocks.begin()));
 
     ASSERT_EQ(loop.latches.size(), expected.latches.size());
     EXPECT_TRUE(
@@ -49,7 +50,7 @@ TEST_F(CFGTestExample1, LOOP) {
     auto loop_tree = cfg_analysis::loop_tree(bb_a);
 
     const cfg_analysis::loop_tree_t expected{
-        {nullptr, {.basic_blocks = {bb_a, bb_b, bb_c, bb_d, bb_e, bb_f, bb_g}}}};
+        {nullptr, {.basic_blocks = {bb_a, bb_b, bb_c, bb_f, bb_e, bb_g, bb_d}}}};
     check_loop_tree(loop_tree, expected);
 }
 
@@ -66,7 +67,7 @@ TEST_F(CFGTestExample2, LOOP) {
     expected[bb_b] = {
         .header = bb_b,
         .latches = {bb_h},
-        .basic_blocks = {bb_b, bb_j, bb_g, bb_h},
+        .basic_blocks = {bb_b, bb_j, bb_c, bb_d, bb_e, bb_f, bb_g, bb_h},
         .reducible = true,
         .outer_loop = &expected[nullptr],
     };
@@ -83,7 +84,7 @@ TEST_F(CFGTestExample2, LOOP) {
 
 TEST_F(CFGTestExample3, LOOP) {
     auto loop_tree = cfg_analysis::loop_tree(bb_a);
-    cfg_analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_c, bb_h, bb_i}}}};
+    cfg_analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_h, bb_c, bb_i}}}};
 
     expected[bb_b] = {
         .header = bb_b,
@@ -145,7 +146,7 @@ TEST_F(CFGTestExample6, LOOP) {
     expected[bb_a] = {
         .header = bb_a,
         .latches = {bb_h},
-        .basic_blocks = {bb_a, bb_h},
+        .basic_blocks = {bb_a, bb_b, bb_c, bb_d, bb_f, bb_g, bb_h},
         .reducible = true,
         .outer_loop = &expected[nullptr],
     };
@@ -158,5 +159,21 @@ TEST_F(CFGTestExample6, LOOP) {
 
     expected[bb_a].inner_loops.push_back(&expected[bb_b]);
     expected[nullptr].inner_loops.push_back(&expected[bb_a]);
+    check_loop_tree(loop_tree, expected);
+}
+
+TEST_F(CFGLoopManyLathes, LOOP) {
+    auto loop_tree = cfg_analysis::loop_tree(bb_a);
+    cfg_analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_e}}}};
+
+    expected[bb_b] = {
+        .header = bb_b,
+        .latches = {bb_c, bb_d},
+        .basic_blocks = {bb_b, bb_c, bb_d},
+        .reducible = true,
+        .outer_loop = &expected[nullptr],
+    };
+
+    expected[nullptr].inner_loops.push_back(&expected[bb_b]);
     check_loop_tree(loop_tree, expected);
 }
