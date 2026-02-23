@@ -108,7 +108,7 @@ class BasicBlock {
     [[nodiscard]] bool has_marker(marker_t marker) const noexcept { return m_marker & marker; }
 };
 
-std::string format_bb(const BasicBlock &bb) {
+inline std::string format_bb(const BasicBlock &bb) {
     std::ostringstream bb_oss{};
 
     bb_oss << "Basic block: {\n";

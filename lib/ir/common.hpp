@@ -15,15 +15,16 @@ enum Marker : marker_t {
     // Algorithms markers
     dfs = 1 << 0,
     rpo = 1 << 1,
+    linear = 1 << 2,
     // Universal colour markers
-    black = 1 << 2,
-    grey = 1 << 3,
-    blue = 1 << 4,
-    red = 1 << 5,
-    green = 1 << 6,
-    purple = 1 << 7,
+    black = 1 << 3,
+    grey = 1 << 4,
+    blue = 1 << 5,
+    red = 1 << 6,
+    green = 1 << 7,
+    purple = 1 << 8,
 
-    removed = 1 << 8,
+    removed = 1 << 9,
 };
 
 using i64 = std::uint64_t;

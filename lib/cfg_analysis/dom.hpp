@@ -14,7 +14,7 @@ namespace cfg_analysis {
 
 using dom_tree_t = std::unordered_map<BasicBlock *, std::vector<BasicBlock *>>;
 
-dom_tree_t dom(BasicBlock *root_basic_block) {
+inline dom_tree_t dom(BasicBlock *root_basic_block) {
     dom_tree_t dom_tree{};
 
     auto dfs_vector = dfs(root_basic_block);

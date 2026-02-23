@@ -12,7 +12,7 @@ namespace injir {
 
 namespace cfg_analysis {
 
-void dfs_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &dfs_vector) {
+inline void dfs_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &dfs_vector) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
     basic_block->add_marker(Marker::dfs);
@@ -32,7 +32,7 @@ void dfs_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &dfs_vecto
     process_successor(basic_block->get_false_successor());
 }
 
-std::vector<BasicBlock *> dfs(BasicBlock *basic_block) {
+inline std::vector<BasicBlock *> dfs(BasicBlock *basic_block) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
     if (basic_block->has_marker(Marker::removed)) {

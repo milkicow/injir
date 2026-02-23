@@ -177,6 +177,8 @@ class PhiInstr final : public Instr {
             }
         }
     }
+
+    [[nodiscard]] auto &get_phi_nodes() & noexcept { return m_incoming; }
 };
 
 } // namespace injir
