@@ -8,7 +8,7 @@
 #include "ir/basic_block.hpp"
 #include "ir/common.hpp"
 
-namespace injir::cfg_analysis {
+namespace injir::graph {
 
 inline void rpo_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &rpo_vector,
                           std::size_t &basic_blocks_counter) {
@@ -51,6 +51,6 @@ inline std::vector<BasicBlock *> rpo(BasicBlock *basic_block, std::size_t basic_
     return rpo_vector;
 }
 
-} // namespace injir::cfg_analysis
+} // namespace injir::graph
 
 #endif // RPO_HPP

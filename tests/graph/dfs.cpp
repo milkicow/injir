@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include <ranges>
 
-#include "cfg_analysis/dfs.hpp"
+#include "graph/dfs.hpp"
 #include "ir/basic_block.hpp"
 
 #include "fixtures.hpp"
@@ -18,14 +18,14 @@ static void check_dfs(const std::vector<BasicBlock *> &dfs_vector,
 }
 
 TEST_F(CFGTestExample1, DFS) {
-    auto dfs_vector = cfg_analysis::dfs(bb_a);
+    auto dfs_vector = graph::dfs(bb_a);
 
     const std::vector<BasicBlock *> expected{bb_a, bb_b, bb_c, bb_d, bb_f, bb_e, bb_g};
     check_dfs(dfs_vector, expected);
 }
 
 TEST_F(CFGTestExample2, DFS) {
-    auto dfs_vector = cfg_analysis::dfs(bb_a);
+    auto dfs_vector = graph::dfs(bb_a);
 
     const std::vector<BasicBlock *> expected{bb_a, bb_b, bb_c, bb_d, bb_e, bb_f,
                                              bb_g, bb_h, bb_i, bb_k, bb_j};
@@ -33,7 +33,7 @@ TEST_F(CFGTestExample2, DFS) {
 }
 
 TEST_F(CFGTestExample3, DFS) {
-    auto dfs_vector = cfg_analysis::dfs(bb_a);
+    auto dfs_vector = graph::dfs(bb_a);
 
     const std::vector<BasicBlock *> expected{bb_a, bb_b, bb_e, bb_f, bb_h, bb_i, bb_g, bb_c, bb_d};
     check_dfs(dfs_vector, expected);

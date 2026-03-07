@@ -4,13 +4,11 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cfg_analysis/dfs.hpp"
+#include "graph/dfs.hpp"
 #include "ir/basic_block.hpp"
 #include "ir/common.hpp"
 
-namespace injir {
-
-namespace cfg_analysis {
+namespace injir::graph {
 
 using dom_tree_t = std::unordered_map<BasicBlock *, std::vector<BasicBlock *>>;
 
@@ -37,7 +35,6 @@ inline dom_tree_t dom(BasicBlock *root_basic_block) {
 
     return dom_tree;
 }
-} // namespace cfg_analysis
-} // namespace injir
+} // namespace injir::graph
 
 #endif // DOM_HPP

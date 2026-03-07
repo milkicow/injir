@@ -9,17 +9,17 @@
 #include <utility>
 #include <vector>
 
-#include <cfg_analysis/loop.hpp>
+#include <analysis/loop.hpp>
 #include <ir/basic_block.hpp>
 
 namespace detail {
-inline std::vector<injir::BasicBlock *>
-linear_order(injir::BasicBlock *basic_block, const injir::cfg_analysis::loop_tree_t &loop_tree,
-             std::size_t size) {
+inline std::vector<injir::BasicBlock *> linear_order(injir::BasicBlock *basic_block,
+                                                     const injir::analysis::loop_tree_t &loop_tree,
+                                                     std::size_t size) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
     std::vector<injir::BasicBlock *> order{};
-    auto rpo = injir::cfg_analysis::rpo(basic_block, size);
+    auto rpo = injir::graph::rpo(basic_block, size);
 
     auto loop_linear_order = [&loop_tree](injir::BasicBlock *header) {
         assert(header != nullptr && "basic block is nullptr");
@@ -52,7 +52,7 @@ linear_order(injir::BasicBlock *basic_block, const injir::cfg_analysis::loop_tre
 }
 } // namespace detail
 
-namespace injir::cfg_analysis {
+namespace injir::analysis {
 
 class LifeTime {
   public:
@@ -257,6 +257,6 @@ class LifeTime {
     }
 };
 
-} // namespace injir::cfg_analysis
+} // namespace injir::analysis
 
 #endif // LIFETIME_HPP

@@ -2,15 +2,12 @@
 #define DFS_HPP
 
 #include <cassert>
-#include <iostream>
 #include <vector>
 
 #include "ir/basic_block.hpp"
 #include "ir/common.hpp"
 
-namespace injir {
-
-namespace cfg_analysis {
+namespace injir::graph {
 
 inline void dfs_algorithm(BasicBlock *basic_block, std::vector<BasicBlock *> &dfs_vector) {
     assert(basic_block != nullptr && "basic block is nullptr");
@@ -49,7 +46,6 @@ inline std::vector<BasicBlock *> dfs(BasicBlock *basic_block) {
     return dfs_vector;
 }
 
-} // namespace cfg_analysis
-} // namespace injir
+} // namespace injir::graph
 
 #endif // DFS_HPP

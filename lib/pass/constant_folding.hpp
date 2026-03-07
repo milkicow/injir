@@ -4,8 +4,8 @@
 #include "functional"
 #include <optional>
 
-#include "cfg_analysis/rpo.hpp"
 #include "common.hpp"
+#include "graph/rpo.hpp"
 #include "ir/basic_block.hpp"
 #include "ir/function.hpp"
 
@@ -66,7 +66,7 @@ class ConstantFolding final : public Pass {
   public:
     bool apply(Function &func) {
         bool changed = false;
-        for (auto *bb : cfg_analysis::rpo(&(*func.begin()), func.size())) {
+        for (auto *bb : graph::rpo(&(*func.begin()), func.size())) {
             for (auto instr_it = bb->begin(), instr_end = bb->end(); instr_it != instr_end;
                  ++instr_it) {
                 if (!InstrTraits::is_binary(instr_it->get()->type())) {

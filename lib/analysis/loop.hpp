@@ -5,14 +5,12 @@
 #include <ranges>
 #include <unordered_map>
 
-#include "cfg_analysis/dom.hpp"
-#include "cfg_analysis/rpo.hpp"
+#include "graph/dom.hpp"
+#include "graph/rpo.hpp"
 #include "ir/basic_block.hpp"
 #include "ir/common.hpp"
 
-namespace injir {
-
-namespace cfg_analysis {
+namespace injir::analysis {
 
 struct Loop {
     BasicBlock *header;
@@ -29,7 +27,7 @@ struct Loop {
 using loop_tree_t = std::unordered_map<BasicBlock *, Loop>;
 
 static void collect_back_edges(BasicBlock *basic_block, loop_tree_t &loop_tree,
-                               const dom_tree_t &dom_tree) {
+                               const graph::dom_tree_t &dom_tree) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
     basic_block->add_marker(Marker::dfs | Marker::grey);
@@ -126,7 +124,7 @@ static void populate_loops(std::vector<BasicBlock *> rpo_vector, loop_tree_t &lo
 inline loop_tree_t loop_tree(BasicBlock *basic_block) {
     assert(basic_block != nullptr && "basic block is nullptr");
 
-    auto dom_tree = dom(basic_block);
+    auto dom_tree = graph::dom(basic_block);
     loop_tree_t loop_tree{};
 
     collect_back_edges(basic_block, loop_tree, dom_tree);
@@ -135,7 +133,7 @@ inline loop_tree_t loop_tree(BasicBlock *basic_block) {
         basic_block_ptr->set_marker(Marker::no_marker);
     }
 
-    auto rpo_vector = rpo(basic_block, dom_tree.size());
+    auto rpo_vector = graph::rpo(basic_block, dom_tree.size());
     bb_to_loop_t bb_to_loop{};
 
     populate_loops(rpo_vector, loop_tree, bb_to_loop);
@@ -159,8 +157,7 @@ inline loop_tree_t loop_tree(BasicBlock *basic_block) {
 
     return loop_tree;
 }
-} // namespace cfg_analysis
 
-} // namespace injir
+} // namespace injir::analysis
 
 #endif // LOOP_HPP

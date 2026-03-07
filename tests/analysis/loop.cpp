@@ -1,13 +1,13 @@
 #include <algorithm>
 #include <gtest/gtest.h>
 
-#include "cfg_analysis/loop.hpp"
+#include "analysis/loop.hpp"
 
 #include "fixtures.hpp"
 
 using namespace injir;
 
-static void loop_eq(const cfg_analysis::Loop &loop, const cfg_analysis::Loop &expected) {
+static void loop_eq(const analysis::Loop &loop, const analysis::Loop &expected) {
     ASSERT_EQ(loop.header, expected.header);
     ASSERT_EQ(loop.reducible, expected.reducible);
 
@@ -34,8 +34,8 @@ static void loop_eq(const cfg_analysis::Loop &loop, const cfg_analysis::Loop &ex
     ASSERT_EQ(loop.inner_loops.size(), expected.inner_loops.size());
 }
 
-static void check_loop_tree(const cfg_analysis::loop_tree_t &loop_tree,
-                            const cfg_analysis::loop_tree_t &expected) {
+static void check_loop_tree(const analysis::loop_tree_t &loop_tree,
+                            const analysis::loop_tree_t &expected) {
     ASSERT_EQ(loop_tree.size(), expected.size());
 
     for (const auto &[header, loop] : loop_tree) {
@@ -47,16 +47,16 @@ static void check_loop_tree(const cfg_analysis::loop_tree_t &loop_tree,
 }
 
 TEST_F(CFGTestExample1, LOOP) {
-    auto loop_tree = cfg_analysis::loop_tree(bb_a);
+    auto loop_tree = analysis::loop_tree(bb_a);
 
-    const cfg_analysis::loop_tree_t expected{
+    const analysis::loop_tree_t expected{
         {nullptr, {.basic_blocks = {bb_a, bb_b, bb_c, bb_f, bb_e, bb_g, bb_d}}}};
     check_loop_tree(loop_tree, expected);
 }
 
 TEST_F(CFGTestExample2, LOOP) {
-    auto loop_tree = cfg_analysis::loop_tree(bb_a);
-    cfg_analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_i, bb_k}}}};
+    auto loop_tree = analysis::loop_tree(bb_a);
+    analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_i, bb_k}}}};
 
     expected[bb_e] = {
         .header = bb_e, .latches = {bb_f}, .basic_blocks = {bb_e, bb_f}, .reducible = true};
@@ -83,8 +83,8 @@ TEST_F(CFGTestExample2, LOOP) {
 }
 
 TEST_F(CFGTestExample3, LOOP) {
-    auto loop_tree = cfg_analysis::loop_tree(bb_a);
-    cfg_analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_h, bb_c, bb_i}}}};
+    auto loop_tree = analysis::loop_tree(bb_a);
+    analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_h, bb_c, bb_i}}}};
 
     expected[bb_b] = {
         .header = bb_b,
@@ -109,9 +109,9 @@ TEST_F(CFGTestExample3, LOOP) {
 }
 
 TEST_F(CFGTestExample4, LOOP) {
-    auto loop_tree = cfg_analysis::loop_tree(bb_a);
+    auto loop_tree = analysis::loop_tree(bb_a);
 
-    cfg_analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_c}}}};
+    analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_c}}}};
 
     expected[bb_b] = {.header = bb_b,
                       .latches = {bb_e},
@@ -125,8 +125,8 @@ TEST_F(CFGTestExample4, LOOP) {
 }
 
 TEST_F(CFGTestExample5, LOOP) {
-    auto loop_tree = cfg_analysis::loop_tree(bb_a);
-    cfg_analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_d}}}};
+    auto loop_tree = analysis::loop_tree(bb_a);
+    analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_d}}}};
 
     expected[bb_b] = {.header = bb_b,
                       .latches = {bb_f},
@@ -140,8 +140,8 @@ TEST_F(CFGTestExample5, LOOP) {
 }
 
 TEST_F(CFGTestExample6, LOOP) {
-    auto loop_tree = cfg_analysis::loop_tree(bb_a);
-    cfg_analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_e}}}};
+    auto loop_tree = analysis::loop_tree(bb_a);
+    analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_e}}}};
 
     expected[bb_a] = {
         .header = bb_a,
@@ -163,8 +163,8 @@ TEST_F(CFGTestExample6, LOOP) {
 }
 
 TEST_F(CFGLoopManyLathes, LOOP) {
-    auto loop_tree = cfg_analysis::loop_tree(bb_a);
-    cfg_analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_e}}}};
+    auto loop_tree = analysis::loop_tree(bb_a);
+    analysis::loop_tree_t expected{{nullptr, {.basic_blocks = {bb_a, bb_e}}}};
 
     expected[bb_b] = {
         .header = bb_b,
