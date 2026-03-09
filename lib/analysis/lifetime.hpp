@@ -249,6 +249,10 @@ class LifeTime {
         build_intervals(loop_tree);
     }
 
+    auto begin() const { return m_intervals.begin(); }
+    auto end() const { return m_intervals.end(); }
+    auto size() const { return m_intervals.size(); }
+
     [[nodiscard]] life_ranges_t get_lifetime(Instr *instr) const {
         if (!m_intervals.contains(instr)) {
             return life_ranges_t{};
