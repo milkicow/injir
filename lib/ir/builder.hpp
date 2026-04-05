@@ -127,6 +127,15 @@ class Builder final {
         return static_cast<ReturnInstr *>(instr);
     }
 
+    CallInstr *create_call(Function *callee, std::vector<Instr *> args) {
+        assert(m_current_bb && "current basic block is nullptr");
+        assert(callee && "callee function is nullptr");
+
+        return static_cast<CallInstr *>(
+            m_current_bb->emplace_back(std::make_unique<CallInstr>(callee, std::move(args)))
+                ->get());
+    }
+
     ConstInstr *create_int(i64 data) {
         return static_cast<ConstInstr *>(
             m_current_bb->emplace_back(std::make_unique<ConstInstr>(data))->get());

@@ -43,6 +43,12 @@ class Function final {
         return m_bbs.insert(pos, std::move(basic_block));
     }
 
+    void splice(const_iterator pos, Function &other) {
+        m_bbs.splice(pos, other.m_bbs);
+    }
+
+    iterator erase(const_iterator pos) { return m_bbs.erase(pos); }
+
     iterator emplace_back(BasicBlock &&basic_block) {
         m_bbs.emplace_back(std::move(basic_block));
         return std::prev(end());

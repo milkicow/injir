@@ -36,7 +36,6 @@ TEST_F(CFGLifeTimePaperExample, RegsAllocExact) {
     check_regalloc(alloc, {{r11, 2}, {r13, 2}, {r14, 0}, {r15, 1}, {r20, 0}, {r21, 0}, {r24, 1}},
                    {{r10, 0}, {r12, 1}});
 }
-
 TEST_F(CFGLifeTimeNestedLoops, REGALLOC) {
     auto loop_tree = injir::analysis::loop_tree(bb_a);
     injir::analysis::LifeTime lt(bb_a, loop_tree, basic_block_counter);

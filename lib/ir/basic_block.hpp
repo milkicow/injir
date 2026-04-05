@@ -58,6 +58,10 @@ class BasicBlock {
 
     iterator erase(const_iterator pos) { return m_instrs.erase(pos); }
 
+    void splice(const_iterator pos, BasicBlock &other, const_iterator first) {
+        m_instrs.splice(pos, other.m_instrs, first);
+    }
+
     // Predecessors management
     using preds_iterator = BBPreds::iterator;
     using preds_const_iterator = BBPreds::const_iterator;

@@ -1,9 +1,9 @@
 #ifndef INSTR_HPP
 #define INSTR_HPP
 
+#include <algorithm>
 #include <cassert>
-#include <cstdint>
-#include <string_view>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -25,6 +25,7 @@ enum class InstrType : instr_type_t {
     kReturn,
     kPhi,
     kJump,
+    kCall,
     kUnknown,
 };
 
@@ -77,6 +78,8 @@ class ConstInstr final : public Instr {
     explicit ConstInstr(i64 value) : Instr(InstrType::kConst), m_value(value) {}
     void replace_operand(Instr * /*from*/, Instr * /*to*/) override {}
 
+    static bool classof(const Instr *instr) { return instr->type() == InstrType::kConst; }
+
     [[nodiscard]] i64 get_value() const noexcept { return m_value; }
 };
 
@@ -86,6 +89,9 @@ class ArgInstr final : public Instr {
 
   public:
     explicit ArgInstr(Type type) : Instr(InstrType::kArg), m_type(type) {}
+
+    static bool classof(const Instr *instr) { return instr->type() == InstrType::kArg; }
+
     void replace_operand(Instr * /*from*/, Instr * /*to*/) override {}
 };
 
@@ -97,6 +103,8 @@ class BinInstr final : public Instr {
   public:
     explicit BinInstr(InstrType type, Instr *lhs, Instr *rhs)
         : Instr(type), m_lhs(lhs), m_rhs(rhs) {}
+
+    static bool classof(const Instr *instr) { return InstrTraits::is_binary(instr->type()); }
 
     void replace_operand(Instr *from, Instr *to) override {
         if (m_lhs == from) {
@@ -117,6 +125,9 @@ class BinInstr final : public Instr {
 class JumpInstr final : public Instr {
   public:
     explicit JumpInstr() : Instr(InstrType::kJump) {}
+
+    static bool classof(const Instr *instr) { return instr->type() == InstrType::kJump; }
+
     void replace_operand(Instr * /*from*/, Instr * /*to*/) override {}
 };
 
@@ -126,6 +137,9 @@ class BranchInstr final : public Instr {
 
   public:
     explicit BranchInstr(Instr *cond) : Instr(InstrType::kBranch), m_cond(cond) {}
+
+    static bool classof(const Instr *instr) { return instr->type() == InstrType::kBranch; }
+
     void replace_operand(Instr *from, Instr *to) override {
         if (m_cond == from) {
             m_cond = to;
@@ -142,6 +156,9 @@ class ReturnInstr final : public Instr {
 
   public:
     explicit ReturnInstr(Instr *ret) : Instr(InstrType::kReturn), m_ret(ret) {}
+
+    static bool classof(const Instr *instr) { return instr->type() == InstrType::kReturn; }
+
     void replace_operand(Instr *from, Instr *to) override {
         if (m_ret == from) {
             m_ret = to;
@@ -155,12 +172,16 @@ class ReturnInstr final : public Instr {
 class BasicBlock;
 
 class PhiInstr final : public Instr {
-  private:
+  public:
     using phi_node = std::pair<Instr *, BasicBlock *>;
+
+  private:
     std::vector<phi_node> m_incoming;
 
   public:
     explicit PhiInstr() : Instr(InstrType::kPhi) {}
+
+    static bool classof(const Instr *instr) { return instr->type() == InstrType::kPhi; }
 
     void add_incoming(Instr *instr, BasicBlock *bb) {
         assert(instr && "instr is nullptr");
@@ -180,6 +201,41 @@ class PhiInstr final : public Instr {
 
     [[nodiscard]] auto &get_phi_nodes() & noexcept { return m_incoming; }
 };
+
+class Function;
+class CallInstr final : public Instr {
+  private:
+    Function *m_callee;
+    std::vector<Instr *> m_args;
+
+  public:
+    explicit CallInstr(Function *callee, std::vector<Instr *> args)
+        : Instr(InstrType::kCall), m_callee{callee}, m_args{std::move(args)} {}
+
+    static bool classof(Instr *instr) { return instr->type() == InstrType::kCall; }
+
+    void replace_operand(Instr *from, Instr *to) override {
+        std::ranges::replace(m_args, from, to);
+    }
+
+    [[nodiscard]] auto get_callee() const noexcept { return m_callee; }
+
+    [[nodiscard]] auto &get_args() & noexcept { return m_args; }
+    [[nodiscard]] auto get_args() && noexcept { return std::move(m_args); }
+};
+
+template <typename TargetInstr, typename InstrR>
+    requires std::ranges::input_range<InstrR> &&
+             requires(std::ranges::range_reference_t<InstrR> ref) {
+                 { ref.get() } -> std::convertible_to<const Instr *>;
+             }
+auto collect_instrs(InstrR &&instr_range) {
+    auto view =
+        instr_range | std::views::transform([](auto &instr) { return instr.get(); }) |
+        std::views::filter([](auto *instr) { return TargetInstr::classof(instr); }) |
+        std::views::transform([](auto *instr) { return static_cast<TargetInstr *>(instr); });
+    return std::vector<TargetInstr *>(std::from_range, view);
+}
 
 } // namespace injir
 
