@@ -70,6 +70,10 @@ class Builder final {
         return create_bin_instr(InstrType::kMul, lhs, rhs);
     }
 
+    BinInstr *create_div(Instr *lhs, Instr *rhs) {
+        return create_bin_instr(InstrType::kDiv, lhs, rhs);
+    }
+
     BinInstr *create_or(Instr *lhs, Instr *rhs) {
         return create_bin_instr(InstrType::kOr, lhs, rhs);
     }
@@ -136,9 +140,62 @@ class Builder final {
                 ->get());
     }
 
-    ConstInstr *create_int(i64 data) {
-        return static_cast<ConstInstr *>(
-            m_current_bb->emplace_back(std::make_unique<ConstInstr>(data))->get());
+    AllocaInstr *create_alloca(Type element_type, Instr *size = nullptr) {
+        return static_cast<AllocaInstr *>(
+            m_current_bb->emplace_back(std::make_unique<AllocaInstr>(element_type, size))->get());
+    }
+
+    LoadInstr *create_load(Instr *ptr) {
+        assert(ptr && "ptr is nullptr");
+
+        return static_cast<LoadInstr *>(
+            m_current_bb->emplace_back(std::make_unique<LoadInstr>(ptr))->get());
+    }
+
+    StoreInstr *create_store(Instr *ptr, Instr *value) {
+        assert(ptr && "ptr is nullptr");
+        assert(value && "value is nullptr");
+
+        auto *instr = m_current_bb->emplace_back(std::make_unique<StoreInstr>(ptr, value))->get();
+        ptr->add_user(instr);
+        value->add_user(instr);
+        return static_cast<StoreInstr *>(instr);
+    }
+
+    GepInstr *create_gep(Instr *ptr, Instr *index) {
+        assert(ptr && "ptr is nullptr");
+        assert(index && "index is nullptr");
+
+        auto *instr = m_current_bb->emplace_back(std::make_unique<GepInstr>(ptr, index))->get();
+        ptr->add_user(instr);
+        index->add_user(instr);
+        return static_cast<GepInstr *>(instr);
+    }
+
+    NullCheck *create_null_check(Instr *check) {
+        assert(check && "check instr is nullptr");
+
+        return static_cast<NullCheck *>(
+            m_current_bb->emplace_back(std::make_unique<NullCheck>(check))->get());
+    }
+
+    BoundCheck *create_bound_check(Instr *check, i64 lower_bound, i64 upper_bound) {
+        assert(check && "check instr is nullptr");
+
+        return static_cast<BoundCheck *>(
+            m_current_bb
+                ->emplace_back(std::make_unique<BoundCheck>(check, lower_bound, upper_bound))
+                ->get());
+    }
+
+    ConstInstr<i64> *create_int(i64 data) {
+        return static_cast<ConstInstr<i64> *>(
+            m_current_bb->emplace_back(std::make_unique<ConstInstr<i64>>(data))->get());
+    }
+
+    ConstInstr<double> *create_double(double data) {
+        return static_cast<ConstInstr<double> *>(
+            m_current_bb->emplace_back(std::make_unique<ConstInstr<double>>(data))->get());
     }
 };
 

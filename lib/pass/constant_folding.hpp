@@ -17,12 +17,12 @@ class ConstantFolding final : public Pass {
     BasicBlock::iterator constant_folding(Operation op, BasicBlock::iterator instr_it,
                                           BasicBlock *bb) {
         auto *instr_ptr = static_cast<BinInstr *>(instr_it->get());
-        auto *lhs = static_cast<const ConstInstr *>(instr_ptr->get_lhs());
-        auto *rhs = static_cast<const ConstInstr *>(instr_ptr->get_rhs());
+        auto *lhs = static_cast<const ConstInstr<i64> *>(instr_ptr->get_lhs());
+        auto *rhs = static_cast<const ConstInstr<i64> *>(instr_ptr->get_rhs());
 
         auto folded_value = op(lhs->get_value(), rhs->get_value());
 
-        auto folded_instr = std::make_unique<ConstInstr>(folded_value);
+        auto folded_instr = std::make_unique<ConstInstr<i64>>(folded_value);
         auto folded_instr_it = bb->insert(std::move(folded_instr), instr_it);
 
         replace_instr_uses(instr_ptr, folded_instr_it->get());

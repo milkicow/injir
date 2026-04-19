@@ -34,7 +34,7 @@ TEST_F(PeepholeTest, MULByZero) {
 
     auto *last_bb = std::prev(bb->end())->get();
     EXPECT_TRUE(last_bb->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(last_bb)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(last_bb)->get_value();
     EXPECT_TRUE(value == 0);
 }
 
@@ -49,7 +49,7 @@ TEST_F(PeepholeTest, MULByZeroReverse) {
 
     auto *last_bb = std::prev(bb->end())->get();
     EXPECT_TRUE(last_bb->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(last_bb)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(last_bb)->get_value();
     EXPECT_TRUE(value == 0);
 }
 
@@ -70,7 +70,7 @@ TEST_F(PeepholeTest, MULByOne) {
     EXPECT_TRUE(mul_result == const1);
 
     EXPECT_TRUE(mul_result->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(mul_result)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(mul_result)->get_value();
     EXPECT_TRUE(value == 0x52);
 }
 
@@ -91,7 +91,7 @@ TEST_F(PeepholeTest, MULByOneReverse) {
     EXPECT_TRUE(mul_result == const2);
 
     EXPECT_TRUE(mul_result->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(mul_result)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(mul_result)->get_value();
     EXPECT_TRUE(value == 0x812);
 }
 
@@ -111,7 +111,7 @@ TEST_F(PeepholeTest, ORWithZero) {
     auto *or_result = static_cast<BinInstr *>(last_bb)->get_lhs();
     EXPECT_TRUE(or_result == const1);
     EXPECT_TRUE(or_result->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(or_result)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(or_result)->get_value();
     EXPECT_TRUE(value == 0x52);
 }
 
@@ -131,7 +131,7 @@ TEST_F(PeepholeTest, ORWithZeroReverse) {
     auto *or_result = static_cast<BinInstr *>(last_bb)->get_lhs();
     EXPECT_TRUE(or_result == const2);
     EXPECT_TRUE(or_result->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(or_result)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(or_result)->get_value();
     EXPECT_TRUE(value == 0x812);
 }
 
@@ -150,7 +150,7 @@ TEST_F(PeepholeTest, ORWithSelf) {
     auto *or_result = static_cast<BinInstr *>(last_bb)->get_lhs();
     EXPECT_TRUE(or_result == const1);
     EXPECT_TRUE(or_result->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(or_result)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(or_result)->get_value();
     EXPECT_TRUE(value == 0x52);
 }
 
@@ -171,7 +171,7 @@ TEST_F(PeepholeTest, SHLByZero) {
     auto *shl_result = static_cast<BinInstr *>(last_bb)->get_lhs();
     EXPECT_TRUE(shl_result == const1);
     EXPECT_TRUE(shl_result->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(shl_result)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(shl_result)->get_value();
     EXPECT_TRUE(value == 0x52);
 }
 
@@ -192,6 +192,6 @@ TEST_F(PeepholeTest, SHLByZeroReverse) {
     auto *shl_result = static_cast<BinInstr *>(last_bb)->get_lhs();
     EXPECT_TRUE(shl_result == const1);
     EXPECT_TRUE(shl_result->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(shl_result)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(shl_result)->get_value();
     EXPECT_TRUE(value == 0);
 }

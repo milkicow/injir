@@ -17,13 +17,13 @@ class Peephole final : public Pass {
 
         auto mul_peepholes_with_consts = [instr_ptr, instr_it, &bb](auto *const_operand,
                                                                     auto *operand) {
-            auto value = static_cast<ConstInstr *>(const_operand)->get_value();
+            auto value = static_cast<ConstInstr<i64> *>(const_operand)->get_value();
 
             if (value == 1) {
                 replace_instr_uses(instr_ptr, operand);
                 return bb->erase(instr_it);
             } else if (value == 0) {
-                auto const_zero = std::make_unique<ConstInstr>(0);
+                auto const_zero = std::make_unique<ConstInstr<i64>>(0);
                 auto inserted_instr_it = bb->insert(std::move(const_zero), instr_it);
                 replace_instr_uses(instr_ptr, inserted_instr_it->get());
                 bb->erase(instr_it);
@@ -56,9 +56,9 @@ class Peephole final : public Pass {
         // i64 shl <instr>, 0 -> replace uses on <instr>
         // i64 shl 0, <instr> -> const i64 0
         if ((rhs->type() == InstrType::kConst &&
-             static_cast<const ConstInstr *>(rhs)->get_value() == 0) ||
+             static_cast<const ConstInstr<i64> *>(rhs)->get_value() == 0) ||
             (lhs->type() == InstrType::kConst &&
-             static_cast<const ConstInstr *>(lhs)->get_value() == 0)) {
+             static_cast<const ConstInstr<i64> *>(lhs)->get_value() == 0)) {
             replace_instr_uses(instr_ptr, lhs);
             return bb->erase(instr_it);
         }
@@ -79,7 +79,7 @@ class Peephole final : public Pass {
 
         auto or_peepholes_with_consts = [instr_ptr, instr_it, &bb](auto *const_operand,
                                                                    auto *operand) {
-            auto value = static_cast<const ConstInstr *>(const_operand)->get_value();
+            auto value = static_cast<const ConstInstr<i64> *>(const_operand)->get_value();
 
             if (value == 0) {
                 replace_instr_uses(instr_ptr, operand);

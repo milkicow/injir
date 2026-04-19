@@ -17,6 +17,7 @@ enum class InstrType : instr_type_t {
     kArg,
     kAdd,
     kMul,
+    kDiv,
     kOr,
     kShl,
     kCmpLess,
@@ -26,6 +27,12 @@ enum class InstrType : instr_type_t {
     kPhi,
     kJump,
     kCall,
+    kAlloca,
+    kLoad,
+    kStore,
+    kGep,
+    kNullCheck,
+    kBoundCheck,
     kUnknown,
 };
 
@@ -54,6 +61,12 @@ class Instr {
     explicit Instr(InstrType type) : m_type(type) {}
     virtual ~Instr() = default;
 
+    Instr(const Instr &) = default;
+    Instr &operator=(const Instr &) = default;
+
+    Instr(Instr &&) = default;
+    Instr &operator=(Instr &&) = default;
+
     virtual void replace_operand(Instr *from, Instr *to) = 0;
 
     void add_user(Instr *user) { m_users.push_back(user); }
@@ -70,17 +83,17 @@ class Instr {
     [[nodiscard]] const std::vector<Instr *> &users() const noexcept { return m_users; }
 };
 
-class ConstInstr final : public Instr {
+template <typename T> class ConstInstr final : public Instr {
   private:
-    i64 m_value = 0;
+    T m_value = 0;
 
   public:
-    explicit ConstInstr(i64 value) : Instr(InstrType::kConst), m_value(value) {}
+    explicit ConstInstr(T value) : Instr{InstrType::kConst}, m_value{value} {}
     void replace_operand(Instr * /*from*/, Instr * /*to*/) override {}
 
-    static bool classof(const Instr *instr) { return instr->type() == InstrType::kConst; }
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kConst; }
 
-    [[nodiscard]] i64 get_value() const noexcept { return m_value; }
+    [[nodiscard]] T get_value() const noexcept { return m_value; }
 };
 
 class ArgInstr final : public Instr {
@@ -90,7 +103,7 @@ class ArgInstr final : public Instr {
   public:
     explicit ArgInstr(Type type) : Instr(InstrType::kArg), m_type(type) {}
 
-    static bool classof(const Instr *instr) { return instr->type() == InstrType::kArg; }
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kArg; }
 
     void replace_operand(Instr * /*from*/, Instr * /*to*/) override {}
 };
@@ -104,7 +117,9 @@ class BinInstr final : public Instr {
     explicit BinInstr(InstrType type, Instr *lhs, Instr *rhs)
         : Instr(type), m_lhs(lhs), m_rhs(rhs) {}
 
-    static bool classof(const Instr *instr) { return InstrTraits::is_binary(instr->type()); }
+    static bool classof(const Instr *instr) noexcept {
+        return InstrTraits::is_binary(instr->type());
+    }
 
     void replace_operand(Instr *from, Instr *to) override {
         if (m_lhs == from) {
@@ -126,7 +141,7 @@ class JumpInstr final : public Instr {
   public:
     explicit JumpInstr() : Instr(InstrType::kJump) {}
 
-    static bool classof(const Instr *instr) { return instr->type() == InstrType::kJump; }
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kJump; }
 
     void replace_operand(Instr * /*from*/, Instr * /*to*/) override {}
 };
@@ -138,7 +153,7 @@ class BranchInstr final : public Instr {
   public:
     explicit BranchInstr(Instr *cond) : Instr(InstrType::kBranch), m_cond(cond) {}
 
-    static bool classof(const Instr *instr) { return instr->type() == InstrType::kBranch; }
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kBranch; }
 
     void replace_operand(Instr *from, Instr *to) override {
         if (m_cond == from) {
@@ -157,7 +172,7 @@ class ReturnInstr final : public Instr {
   public:
     explicit ReturnInstr(Instr *ret) : Instr(InstrType::kReturn), m_ret(ret) {}
 
-    static bool classof(const Instr *instr) { return instr->type() == InstrType::kReturn; }
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kReturn; }
 
     void replace_operand(Instr *from, Instr *to) override {
         if (m_ret == from) {
@@ -181,7 +196,7 @@ class PhiInstr final : public Instr {
   public:
     explicit PhiInstr() : Instr(InstrType::kPhi) {}
 
-    static bool classof(const Instr *instr) { return instr->type() == InstrType::kPhi; }
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kPhi; }
 
     void add_incoming(Instr *instr, BasicBlock *bb) {
         assert(instr && "instr is nullptr");
@@ -210,9 +225,9 @@ class CallInstr final : public Instr {
 
   public:
     explicit CallInstr(Function *callee, std::vector<Instr *> args)
-        : Instr(InstrType::kCall), m_callee{callee}, m_args{std::move(args)} {}
+        : Instr{InstrType::kCall}, m_callee{callee}, m_args{std::move(args)} {}
 
-    static bool classof(Instr *instr) { return instr->type() == InstrType::kCall; }
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kCall; }
 
     void replace_operand(Instr *from, Instr *to) override {
         std::ranges::replace(m_args, from, to);
@@ -222,6 +237,145 @@ class CallInstr final : public Instr {
 
     [[nodiscard]] auto &get_args() & noexcept { return m_args; }
     [[nodiscard]] auto get_args() && noexcept { return std::move(m_args); }
+};
+
+class AllocaInstr final : public Instr {
+  private:
+    Type m_element_type;
+    Instr *m_size; // nullptr = fixed size 1
+
+  public:
+    explicit AllocaInstr(Type element_type, Instr *size = nullptr)
+        : Instr{InstrType::kAlloca}, m_element_type{element_type}, m_size{size} {}
+
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kAlloca; }
+
+    void replace_operand(Instr *from, Instr *to) override {
+        if (m_size == from) {
+            m_size = to;
+        }
+    }
+
+    [[nodiscard]] Type element_type() const noexcept { return m_element_type; }
+    [[nodiscard]] Instr *size() const noexcept { return m_size; }
+};
+
+class LoadInstr final : public Instr {
+  private:
+    Instr *m_ptr;
+
+  public:
+    explicit LoadInstr(Instr *ptr) : Instr{InstrType::kLoad}, m_ptr{ptr} {}
+
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kLoad; }
+
+    void replace_operand(Instr *from, Instr *to) override {
+        if (m_ptr == from) {
+            m_ptr = to;
+        }
+    }
+
+    [[nodiscard]] Instr *ptr() const noexcept { return m_ptr; }
+};
+
+class StoreInstr final : public Instr {
+  private:
+    Instr *m_ptr;
+    Instr *m_value;
+
+  public:
+    explicit StoreInstr(Instr *ptr, Instr *value)
+        : Instr{InstrType::kStore}, m_ptr{ptr}, m_value{value} {}
+
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kStore; }
+
+    void replace_operand(Instr *from, Instr *to) override {
+        if (m_ptr == from) {
+            m_ptr = to;
+        }
+        if (m_value == from) {
+            m_value = to;
+        }
+    }
+
+    [[nodiscard]] Instr *ptr() const noexcept { return m_ptr; }
+    [[nodiscard]] Instr *value() const noexcept { return m_value; }
+};
+
+class GepInstr final : public Instr {
+  private:
+    Instr *m_ptr;
+    Instr *m_index;
+
+  public:
+    explicit GepInstr(Instr *ptr, Instr *index)
+        : Instr{InstrType::kGep}, m_ptr{ptr}, m_index{index} {}
+
+    static bool classof(const Instr *instr) noexcept { return instr->type() == InstrType::kGep; }
+
+    void replace_operand(Instr *from, Instr *to) override {
+        if (m_ptr == from) {
+            m_ptr = to;
+        }
+        if (m_index == from) {
+            m_index = to;
+        }
+    }
+
+    [[nodiscard]] Instr *ptr() const noexcept { return m_ptr; }
+    [[nodiscard]] Instr *index() const noexcept { return m_index; }
+};
+
+class NullCheck final : public Instr {
+  private:
+    Instr *m_check;
+
+  public:
+    explicit NullCheck(Instr *check) : Instr{InstrType::kNullCheck}, m_check{check} {}
+
+    static bool classof(const Instr *instr) noexcept {
+        return instr->type() == InstrType::kNullCheck;
+    }
+
+    void replace_operand(Instr *from, Instr *to) override {
+        if (m_check == from) {
+            m_check = to;
+        }
+    }
+
+    [[nodiscard]] auto get_check() noexcept { return m_check; }
+
+    bool dominates(const NullCheck &rhs) const { return m_check == rhs.m_check; }
+};
+
+class BoundCheck final : public Instr {
+  private:
+    i64 m_lower_bound;
+    i64 m_upper_bound;
+
+    Instr *m_check;
+
+  public:
+    explicit BoundCheck(Instr *check, i64 lower_bound, i64 upper_bound)
+        : Instr{InstrType::kBoundCheck}, m_lower_bound{lower_bound}, m_upper_bound{upper_bound},
+          m_check{check} {}
+
+    static bool classof(const Instr *instr) noexcept {
+        return instr->type() == InstrType::kBoundCheck;
+    }
+
+    void replace_operand(Instr *from, Instr *to) override {
+        if (m_check == from) {
+            m_check = to;
+        }
+    }
+
+    [[nodiscard]] auto get_check() noexcept { return m_check; }
+
+    bool dominates(const BoundCheck &rhs) const {
+        return m_lower_bound <= rhs.m_lower_bound && rhs.m_upper_bound <= m_upper_bound &&
+               m_check == rhs.m_check;
+    };
 };
 
 template <typename TargetInstr, typename InstrR>

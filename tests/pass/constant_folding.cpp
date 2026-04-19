@@ -33,7 +33,7 @@ TEST_F(ConstantFoldingTest, ADD) {
 
     auto *last_bb = std::prev(bb->end())->get();
     EXPECT_TRUE(last_bb->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(last_bb)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(last_bb)->get_value();
     EXPECT_TRUE(value == 0x864);
 }
 
@@ -48,7 +48,7 @@ TEST_F(ConstantFoldingTest, MUL) {
 
     auto *last_bb = std::prev(bb->end())->get();
     EXPECT_TRUE(last_bb->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(last_bb)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(last_bb)->get_value();
     EXPECT_TRUE(value == 0x295C4);
 }
 
@@ -63,7 +63,7 @@ TEST_F(ConstantFoldingTest, OR) {
 
     auto *last_bb = std::prev(bb->end())->get();
     EXPECT_TRUE(last_bb->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(last_bb)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(last_bb)->get_value();
     EXPECT_TRUE(value == 0x852);
 }
 
@@ -78,6 +78,6 @@ TEST_F(ConstantFoldingTest, SHL) {
 
     auto *last_bb = std::prev(bb->end())->get();
     EXPECT_TRUE(last_bb->type() == injir::InstrType::kConst);
-    auto value = static_cast<ConstInstr *>(last_bb)->get_value();
+    auto value = static_cast<ConstInstr<i64> *>(last_bb)->get_value();
     EXPECT_TRUE(value == 0xA40);
 }

@@ -47,6 +47,13 @@ class BasicBlock {
     [[nodiscard]] const_iterator begin() const noexcept { return m_instrs.begin(); }
     [[nodiscard]] const_iterator end() const noexcept { return m_instrs.end(); }
 
+    [[nodiscard]] auto instrs() noexcept {
+        return std::ranges::subrange(m_instrs.begin(), m_instrs.end());
+    }
+    [[nodiscard]] auto instrs() const noexcept {
+        return std::ranges::subrange(m_instrs.begin(), m_instrs.end());
+    }
+
     iterator insert(std::unique_ptr<Instr> &&instr, const_iterator pos) {
         return m_instrs.insert(pos, std::move(instr));
     }
